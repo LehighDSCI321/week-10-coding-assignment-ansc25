@@ -1,4 +1,6 @@
-"Week 10 coding assignment TraversableDigraph and DAG - Submitted by Anurag Subedi"
+"""
+Week 10 coding assignment TraversableDigraph and DAG - Submitted by Anurag Subedi
+"""
 from collections import deque
 from graphviz import Digraph
 from bokeh.plotting import figure, show, output_file, save
@@ -300,7 +302,6 @@ class DAG(TraversableDigraph):
             
         """
         # First, ensure both nodes exist (add them if they don't)
-        # We need to do this again before checking for cycles 
         if start_node_id not in self._nodes:
             self.add_node(start_node_id, start_node_value or 0)
         elif start_node_value is not None:
@@ -312,7 +313,7 @@ class DAG(TraversableDigraph):
             self._nodes[end_node_id] = end_node_value
 
         # Check if adding this edge would create a cycle
-        # A cycle would be created if there's already a path from end_node to start_node
+        # A cycle - created if there's already a path from end_node to start_node
         # We use DFS to check if we can reach start_node from end_node
         try:
             # Traverse from end_node and see if we can reach start_node
