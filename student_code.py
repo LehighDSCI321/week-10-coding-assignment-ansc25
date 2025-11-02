@@ -1,7 +1,7 @@
 "Week 10 coding assignment TraversableDigraph and DAG - Submitted by Anurag Subedi"
+from collections import deque
 from graphviz import Digraph
 from bokeh.plotting import figure, show, output_file, save
-from collections import deque
 
 class VersatileDigraph():
     """ A versatile directed graph implementation.
@@ -225,10 +225,7 @@ class TraversableDigraph(SortableDigraph):
     """A sortable directed graph with traversal capabilities.
     Extends SortableDigraph with DFS and BFS traversal methods.
     """
-    
-    def __init__(self):
-        super().__init__()
-    
+
     def dfs(self, start_node):
         """Perform iterative depth-first search traversal from start_node.        
         Uses a stack (LIFO) to traverse the graph in depth-first order.  
@@ -238,18 +235,20 @@ class TraversableDigraph(SortableDigraph):
         """
         # Ensure the start node exists
         self._ensure_node_exists(start_node)
-        
+
         S, Q = set(), []  # Visited-set and stack (LIFO queue)
         Q.append(start_node)  # We plan on visiting start_node
-        
+
         while Q:  # Planned nodes left?
             u = Q.pop()  # Get one (LIFO - last in, first out)
             if u in S:  # Already visited? Skip it
                 continue
             S.add(u)  # We've visited it now
             Q.extend(self.successors(u))  # Schedule all neighbors
-            yield u  # Report u as visited
-    
+            # Only yield if it's not the start node
+            if u != start_node:
+                yield u  # Report u as visited
+
     def bfs(self, start_node):
         """Perform breadth-first search traversal from start_node.
         Uses a deque (FIFO) to traverse the graph in breadth-first order.        
@@ -259,11 +258,11 @@ class TraversableDigraph(SortableDigraph):
         """
         # Ensure the start node exists
         self._ensure_node_exists(start_node)
-        
+
         S = set()  # Visited-set
         Q = deque()  # Queue (FIFO) for BFS
         Q.append(start_node)  # We plan on visiting start_node
-        
+
         while Q:  # Planned nodes left?
             u = Q.popleft()  # Get one (FIFO - first in, first out)
             if u in S:  # Already visited? Skip it
@@ -271,18 +270,16 @@ class TraversableDigraph(SortableDigraph):
             S.add(u)  # We've visited it now
             for v in self.successors(u):  # Schedule all neighbors
                 Q.append(v)
-            yield u  # Report u as visited
-
+            # Only yield if it's not the start node
+            if u != start_node:
+                yield u  # Report u as visited
 
 class DAG(TraversableDigraph):
     """A Directed Acyclic Graph that prevents cycle creation.
     Extends TraversableDigraph and overrides add_edge to ensure
     that no edge addition will create a cycle in the graph.
     """
-    
-    def __init__(self):
-        super().__init__()
-    
+
     def add_edge(self, start_node_id, end_node_id,
                  start_node_value=None, end_node_value=None,
                  edge_name=None, edge_weight=0):
@@ -308,12 +305,12 @@ class DAG(TraversableDigraph):
             self.add_node(start_node_id, start_node_value or 0)
         elif start_node_value is not None:
             self._nodes[start_node_id] = start_node_value
-        
+
         if end_node_id not in self._nodes:
             self.add_node(end_node_id, end_node_value or 0)
         elif end_node_value is not None:
             self._nodes[end_node_id] = end_node_value
-        
+
         # Check if adding this edge would create a cycle
         # A cycle would be created if there's already a path from end_node to start_node
         # We use DFS to check if we can reach start_node from end_node
@@ -331,22 +328,21 @@ class DAG(TraversableDigraph):
             # end_node_id doesn't exist yet or has no successors
             # This is fine, no cycle possible
             pass
-        
+
         # No cycle detected, safe to add the edge using parent's method
         super().add_edge(start_node_id, end_node_id,
                         start_node_value, end_node_value,
                         edge_name, edge_weight)
-
 
 # Example usage and testing
 if __name__ == "__main__":
     print("=" * 70)
     print("Testing TraversableDigraph - DFS and BFS")
     print("=" * 70)
-    
+
     # Create a traversable graph
     tg = TraversableDigraph()
-    
+
     # Build a sample graph
     #     A
     #    / \
@@ -359,20 +355,18 @@ if __name__ == "__main__":
     tg.add_edge("B", "D")
     tg.add_edge("B", "E")
     tg.add_edge("C", "F")
-    
 
     print("\nDFS from A:")
     dfs_result = list(tg.dfs("A"))
     print("  ", " -> ".join(dfs_result))
-    
+
     print("\nBFS from A:")
     bfs_result = list(tg.bfs("A"))
     print("  ", " -> ".join(bfs_result))
-    
 
     # test with the clothing example
     clothing_dag = DAG()
-    
+
     # Add all dependencies
     print("\nBuilding clothing dependency DAG...")
     clothing_dag.add_edge("shirt", "pants")
@@ -384,20 +378,20 @@ if __name__ == "__main__":
     clothing_dag.add_edge("vest", "jacket")
     clothing_dag.add_edge("belt", "jacket")
     print("  All valid edges added")
-    
+
     # Try to add an invalid edge
     print("\nadding jacket -> shirt (would create cycle):")
     try:
         clothing_dag.add_edge("jacket", "shirt")
         print("ERROR: Should have prevented cycle!")
     except ValueError as e:
-        print(f"Correctly catched the cycle prevention exception")
-    
+        print("Correctly catched the cycle prevention exception")
+
     print("\nTopological sort (valid dressing order):")
     print("  ", " -> ".join(clothing_dag.top_sort()))
-    
+
     print("\nDFS from 'shirt':")
     print("  ", " -> ".join(list(clothing_dag.dfs("shirt"))))
-    
+
     print("\nBFS from 'shirt':")
     print("  ", " -> ".join(list(clothing_dag.bfs("shirt"))))
