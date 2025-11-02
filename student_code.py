@@ -236,15 +236,15 @@ class TraversableDigraph(SortableDigraph):
         # Ensure the start node exists
         self._ensure_node_exists(start_node)
 
-        S, Q = set(), []  # Visited-set and stack (LIFO queue)
-        Q.append(start_node)  # We plan on visiting start_node
+        s, q = set(), []  # Visited-set and stack (LIFO queue)
+        q.append(start_node)  # We plan on visiting start_node
 
-        while Q:  # Planned nodes left?
-            u = Q.pop()  # Get one (LIFO - last in, first out)
-            if u in S:  # Already visited? Skip it
+        while q:  # Planned nodes left?
+            u = q.pop()  # Get one (LIFO - last in, first out)
+            if u in s:  # Already visited? Skip it
                 continue
-            S.add(u)  # We've visited it now
-            Q.extend(self.successors(u))  # Schedule all neighbors
+            s.add(u)  # We've visited it now
+            q.extend(self.successors(u))  # Schedule all neighbors
             # Only yield if it's not the start node
             if u != start_node:
                 yield u  # Report u as visited
@@ -259,17 +259,17 @@ class TraversableDigraph(SortableDigraph):
         # Ensure the start node exists
         self._ensure_node_exists(start_node)
 
-        S = set()  # Visited-set
-        Q = deque()  # Queue (FIFO) for BFS
-        Q.append(start_node)  # We plan on visiting start_node
+        s = set()  # Visited-set
+        q = deque()  # Queue (FIFO) for BFS
+        q.append(start_node)  # We plan on visiting start_node
 
-        while Q:  # Planned nodes left?
-            u = Q.popleft()  # Get one (FIFO - first in, first out)
-            if u in S:  # Already visited? Skip it
+        while q:  # Planned nodes left?
+            u = q.popleft()  # Get one (FIFO - first in, first out)
+            if u in s:  # Already visited? Skip it
                 continue
-            S.add(u)  # We've visited it now
+            s.add(u)  # We've visited it now
             for v in self.successors(u):  # Schedule all neighbors
-                Q.append(v)
+                q.append(v)
             # Only yield if it's not the start node
             if u != start_node:
                 yield u  # Report u as visited
